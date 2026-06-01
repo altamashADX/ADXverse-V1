@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADXverse Admin Command Center</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="assets/adxverse-mark.svg" type="image/svg+xml">
+  <style>
+    body { background: #080808; color: #fff; }
+    .admin-lock { min-height: 100svh; display: grid; place-items: center; padding: 24px; }
+    .admin-login { width: min(460px, 100%); border: 1px solid rgba(255,255,255,.14); border-radius: 8px; padding: 34px; background: #111; }
+    .admin-app { display: none; min-height: 100svh; grid-template-columns: 280px 1fr; }
+    .admin-unlocked .admin-lock { display: none; }
+    .admin-unlocked .admin-app { display: grid; }
+    .admin-side { border-right: 1px solid rgba(255,255,255,.12); padding: 28px; background: #0b0b0b; }
+    .admin-side nav { display: grid; gap: 12px; margin-top: 42px; color: rgba(255,255,255,.68); }
+    .admin-main { padding: clamp(24px, 5vw, 56px); }
+    .admin-top { display: flex; justify-content: space-between; gap: 24px; align-items: start; margin-bottom: 26px; }
+    .admin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .admin-card, .admin-panel { border: 1px solid rgba(255,255,255,.12); border-radius: 8px; background: #141414; padding: 22px; }
+    .admin-card strong { display: block; color: var(--gold); font-family: Georgia, serif; font-size: 42px; line-height: 1; }
+    .admin-layout { display: grid; grid-template-columns: 1.15fr .85fr; gap: 14px; margin-top: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,.1); text-align: left; color: rgba(255,255,255,.76); }
+    th { color: var(--gold); font-size: 12px; text-transform: uppercase; letter-spacing: .12em; }
+    .quote-form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .quote-total { margin-top: 20px; padding: 22px; border-radius: 8px; background: #080808; border: 1px solid rgba(255,255,255,.12); }
+    .quote-total strong { display: block; color: var(--gold); font-size: 34px; font-family: Georgia, serif; }
+    @media (max-width: 980px) { .admin-app, .admin-grid, .admin-layout, .quote-form { grid-template-columns: 1fr; } .admin-side { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.12); } }
+  </style>
+</head>
+<body>
+  <section class="admin-lock">
+    <form class="admin-login" data-admin-login>
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/adxverse-wordmark.svg" alt="ADXverse"></a>
+      <p class="eyebrow" style="margin-top:34px">Secure Admin Access</p>
+      <h1 style="font-size:48px">Command center</h1>
+      <label>Access ID<input required autocomplete="username" value="admin@adxverse.com"></label>
+      <label style="margin-top:12px">Passcode<input required type="password" autocomplete="current-password" value="adxverse"></label>
+      <button class="button button-primary" style="width:100%;margin-top:18px" type="submit">Enter Dashboard</button>
+    </form>
+  </section>
+  <div class="admin-app">
+    <aside class="admin-side">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/adxverse-wordmark.svg" alt="ADXverse"></a>
+      <nav><a href="#customers">Customer Database</a><a href="#pricing">Pricing Engine</a><a href="#projects">Project Management</a><a href="#proposals">Proposal Flow</a></nav>
+    </aside>
+    <main class="admin-main">
+      <div class="admin-top">
+        <div><p class="eyebrow">Internal Systems</p><h1 style="font-size:clamp(42px,7vw,82px)">Business control for leads, costing, and execution.</h1></div>
+        <a class="button button-primary" href="contact.html">Public Contact</a>
+      </div>
+      <section class="admin-grid">
+        <article class="admin-card"><strong>24</strong><span>Active leads</span></article>
+        <article class="admin-card"><strong>07</strong><span>Live projects</span></article>
+        <article class="admin-card"><strong>18%</strong><span>Target margin</span></article>
+        <article class="admin-card"><strong>05</strong><span>Pending proposals</span></article>
+      </section>
+      <section class="admin-layout">
+        <div class="admin-panel" id="customers">
+          <h2>Customer Database</h2>
+          <table><thead><tr><th>Customer</th><th>Company</th><th>Industry</th><th>GST</th><th>Notes</th></tr></thead><tbody><tr><td>Aarav Mehta</td><td>Northline Retail</td><td>Retail</td><td>27ABCDE1234F1Z5</td><td>Rollout package requested</td></tr><tr><td>Nisha Rao</td><td>Urban Clinics</td><td>Healthcare</td><td>29ABCDE1234F1Z2</td><td>Site visit completed</td></tr><tr><td>Kabir Shah</td><td>Orion Workspaces</td><td>Corporate</td><td>24ABCDE1234F1Z7</td><td>Proposal review Friday</td></tr></tbody></table>
+        </div>
+        <div class="admin-panel" id="pricing">
+          <h2>Pricing Engine</h2>
+          <form class="quote-form" data-quote-form>
+            <label>Category<select name="category"><option>ACP</option><option>Acrylic</option><option>LED</option><option>Fabrication</option><option>SS Letters</option><option>Vinyl</option><option>Installation</option><option>Interior Works</option><option>Carpentry</option><option>Civil</option><option>Electrical</option><option>Flooring</option><option>Ceiling</option><option>Painting</option></select></label>
+            <label>Quantity<input name="quantity" type="number" min="0" value="10"></label>
+            <label>Cost Per Unit<input name="cost" type="number" min="0" value="2500"></label>
+            <label>Margin %<input name="margin" type="number" min="0" max="95" value="22"></label>
+          </form>
+          <div class="quote-total"><span>Suggested Quote</span><strong data-quote-output>INR 32,051</strong></div>
+        </div>
+      </section>
+      <section class="admin-panel" id="projects" style="margin-top:14px">
+        <h2>Project Management</h2>
+        <table><thead><tr><th>Project</th><th>Stage</th><th>Payment</th><th>Owner</th><th>Next Action</th></tr></thead><tbody><tr><td>Corporate HQ Identity</td><td>Production</td><td>Advance received</td><td>ADX Nexus</td><td>Lighting test</td></tr><tr><td>Retail Launch System</td><td>Proposal</td><td>Pending</td><td>ADX Nexus</td><td>Material approval</td></tr><tr><td>Hospitality Arrival Space</td><td>Site visit</td><td>Not invoiced</td><td>ADX Studios</td><td>Measurement pack</td></tr></tbody></table>
+      </section>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
