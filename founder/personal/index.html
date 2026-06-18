@@ -1,0 +1,1668 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MD Altamash Asgar — Foundry OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+ 
+<style>
+:root {
+  --forge: #0A0A0A;
+  --bone: #F5F3EE;
+  --gold: #C9A84C;
+  --gold-dim: #8A6F2E;
+  --iron: #1A1A1A;
+  --iron2: #242424;
+  --ash: #5C5C5C;
+  --ash-light: #888;
+  --border: rgba(255,255,255,0.07);
+  --serif: 'Spectral', Georgia, serif;
+  --sans: 'Space Grotesk', sans-serif;
+  --mono: 'Space Mono', monospace;
+}
+ 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+ 
+body {
+  background: var(--forge);
+  color: var(--bone);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+  cursor: none;
+}
+ 
+/* ── CUSTOM CURSOR ── */
+#cursor {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: normal;
+}
+ 
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.12s ease-out, width 0.3s, height 0.3s;
+}
+ 
+body:has(a:hover) #cursor,
+body:has(button:hover) #cursor { width: 14px; height: 14px; background: var(--gold); }
+body:has(a:hover) #cursor-ring,
+body:has(button:hover) #cursor-ring { width: 52px; height: 52px; border-color: rgba(201,168,76,0.6); }
+ 
+/* ── COORDINATE INDICATOR ── */
+#coords {
+  position: fixed;
+  right: 32px;
+  bottom: 36px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ash);
+  letter-spacing: 0.1em;
+  z-index: 900;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+ 
+/* ── SECTION LABEL (top-left corner, architectural) ── */
+.section-label {
+  position: absolute;
+  top: 32px;
+  left: 40px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ash);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+ 
+/* ── GRAIN OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 1000;
+}
+ 
+/* ── GENERAL SECTION ── */
+section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 80px 80px 160px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+ 
+/* ── HERO ── */
+#hero {
+  padding: 0;
+  justify-content: center;
+  align-items: flex-start;
+}
+ 
+.hero-inner {
+  padding: 80px 80px 80px 160px;
+  max-width: 900px;
+  z-index: 2;
+}
+ 
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+ 
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 32px;
+  height: 1px;
+  background: var(--gold);
+}
+ 
+.hero-name {
+  font-family: var(--serif);
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 300;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  color: var(--bone);
+  margin-bottom: 8px;
+}
+ 
+.hero-name em {
+  font-style: italic;
+  color: rgba(245,243,238,0.4);
+}
+ 
+.hero-os-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ash);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 56px;
+  padding-left: 4px;
+}
+ 
+.hero-statement {
+  font-family: var(--serif);
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 300;
+  line-height: 1.75;
+  color: rgba(245,243,238,0.6);
+  max-width: 560px;
+  margin-bottom: 72px;
+  border-left: 1px solid var(--gold-dim);
+  padding-left: 24px;
+}
+ 
+.hero-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+ 
+.cta-enter {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bone);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: gap 0.3s;
+}
+ 
+.cta-enter:hover { gap: 24px; }
+ 
+.cta-enter::after {
+  content: '→';
+  font-family: var(--sans);
+  font-size: 14px;
+}
+ 
+.cta-secondary {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+ 
+.cta-secondary:hover { color: var(--bone); }
+ 
+/* Hero background — architectural grid lines */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 1;
+}
+ 
+/* Large roman numeral watermark */
+.hero-watermark {
+  position: absolute;
+  right: -40px;
+  bottom: -60px;
+  font-family: var(--serif);
+  font-size: 320px;
+  font-weight: 300;
+  color: var(--bone);
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 1;
+  line-height: 1;
+  user-select: none;
+}
+ 
+/* ── MANIFEST (about) ── */
+#manifest {
+  padding-left: 160px;
+  padding-right: 80px;
+}
+ 
+.manifest-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  max-width: 1000px;
+}
+ 
+.manifest-left {}
+ 
+.section-number {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+ 
+.section-number::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--gold);
+  display: inline-block;
+}
+ 
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 4vw, 60px);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 40px;
+  color: var(--bone);
+}
+ 
+.section-title em {
+  font-style: italic;
+  color: rgba(245,243,238,0.4);
+}
+ 
+.body-text {
+  font-size: 15px;
+  color: rgba(245,243,238,0.55);
+  line-height: 1.8;
+  max-width: 520px;
+}
+ 
+.body-text + .body-text {
+  margin-top: 24px;
+}
+ 
+.manifest-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0;
+}
+ 
+.identity-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.3s;
+}
+ 
+.identity-row:first-child { border-top: 1px solid var(--border); }
+ 
+.identity-row:hover { border-color: rgba(201,168,76,0.2); }
+ 
+.identity-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ash);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+ 
+.identity-value {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(245,243,238,0.7);
+  text-align: right;
+}
+ 
+/* ── LAYERS / THREE ROOMS ── */
+#layers {
+  padding-left: 160px;
+}
+ 
+.layers-intro {
+  margin-bottom: 80px;
+  max-width: 600px;
+}
+ 
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-right: 80px;
+}
+ 
+.room {
+  background: var(--forge);
+  padding: 48px 40px;
+  transition: background 0.4s;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+ 
+.room::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(201,168,76,0.04) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+ 
+.room:hover { background: var(--iron); }
+.room:hover::before { opacity: 1; }
+ 
+.room-number {
+  font-family: var(--serif);
+  font-size: 64px;
+  font-weight: 300;
+  color: rgba(201,168,76,0.12);
+  line-height: 1;
+  margin-bottom: 24px;
+  transition: color 0.4s;
+}
+ 
+.room:hover .room-number { color: rgba(201,168,76,0.25); }
+ 
+.room-name {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+ 
+.room-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1.3;
+  margin-bottom: 20px;
+  color: var(--bone);
+}
+ 
+.room-body {
+  font-size: 13px;
+  color: var(--ash);
+  line-height: 1.75;
+}
+ 
+/* ── BUILD LOG (projects) ── */
+#buildlog {
+  padding-left: 160px;
+}
+ 
+.log-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 64px;
+  margin-right: 80px;
+}
+ 
+.log-status {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ash);
+  letter-spacing: 0.1em;
+}
+ 
+.log-status span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+ 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+ 
+.projects-list {
+  margin-right: 80px;
+}
+ 
+.project-item {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 40px;
+  padding: 36px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: start;
+  transition: border-color 0.3s;
+  cursor: default;
+  position: relative;
+}
+ 
+.project-item::after {
+  content: '→';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gold);
+  opacity: 0;
+  transition: opacity 0.3s, right 0.3s;
+  font-size: 16px;
+}
+ 
+.project-item:hover::after { opacity: 1; right: -8px; }
+.project-item:hover { border-color: rgba(245,243,238,0.12); }
+.project-item:first-child { border-top: 1px solid var(--border); }
+ 
+.project-index {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ash);
+  letter-spacing: 0.1em;
+  padding-top: 4px;
+}
+ 
+.project-main {}
+ 
+.project-name {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--bone);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+ 
+.project-desc {
+  font-size: 13px;
+  color: var(--ash);
+  line-height: 1.65;
+  max-width: 480px;
+}
+ 
+.project-meta {
+  text-align: right;
+  padding-top: 4px;
+}
+ 
+.project-status {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border: 1px solid;
+}
+ 
+.status-active { color: var(--gold); border-color: rgba(201,168,76,0.3); }
+.status-building { color: #7AB8A0; border-color: rgba(122,184,160,0.3); }
+.status-research { color: #A0A7CC; border-color: rgba(160,167,204,0.3); }
+.status-concept { color: var(--ash); border-color: rgba(91,91,91,0.3); }
+ 
+.project-year {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ash);
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+}
+ 
+/* ── ADXVERSE ECOSYSTEM ── */
+#adxverse {
+  padding-left: 160px;
+  padding-right: 80px;
+}
+ 
+.ecosystem-title-block {
+  margin-bottom: 80px;
+  max-width: 700px;
+}
+ 
+.ecosystem-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+ 
+.eco-node {
+  background: var(--forge);
+  padding: 40px 40px;
+  transition: background 0.3s;
+  cursor: default;
+}
+ 
+.eco-node:hover { background: var(--iron); }
+ 
+.eco-node-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+ 
+.eco-node-tag::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--gold-dim);
+  display: inline-block;
+}
+ 
+.eco-node-name {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--bone);
+  margin-bottom: 12px;
+}
+ 
+.eco-node-desc {
+  font-size: 13px;
+  color: var(--ash);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+ 
+.eco-node-domains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+ 
+.domain-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ash);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+}
+ 
+/* ── LEARNING LOG ── */
+#notebook {
+  padding-left: 160px;
+  padding-right: 80px;
+}
+ 
+.notebook-header {
+  margin-bottom: 72px;
+}
+ 
+.entries-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+ 
+.entry-card {
+  border: 1px solid var(--border);
+  padding: 32px 28px;
+  transition: border-color 0.3s, background 0.3s;
+  cursor: default;
+  position: relative;
+}
+ 
+.entry-card:hover {
+  border-color: rgba(245,243,238,0.12);
+  background: var(--iron);
+}
+ 
+.entry-date {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ash);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+ 
+.entry-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.35;
+  color: var(--bone);
+  margin-bottom: 16px;
+}
+ 
+.entry-excerpt {
+  font-size: 13px;
+  color: var(--ash);
+  line-height: 1.7;
+}
+ 
+.entry-domain {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+ 
+/* ── CONTACT / TRANSMIT ── */
+#transmit {
+  padding-left: 160px;
+  padding-right: 80px;
+  min-height: 80vh;
+}
+ 
+.transmit-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+ 
+.transmit-left {}
+ 
+.transmit-right {
+  padding-top: 24px;
+}
+ 
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 48px;
+}
+ 
+.contact-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--bone);
+  transition: border-color 0.3s;
+}
+ 
+.contact-link:first-child { border-top: 1px solid var(--border); }
+.contact-link:hover { border-color: rgba(201,168,76,0.3); }
+ 
+.contact-link-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+ 
+.contact-link-value {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+ 
+.contact-link:hover .contact-link-value { color: var(--gold); }
+ 
+.contact-link-arrow {
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+ 
+.contact-link:hover .contact-link-arrow { opacity: 1; }
+ 
+.system-status {
+  border: 1px solid var(--border);
+  padding: 32px;
+}
+ 
+.system-status-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 32px;
+}
+ 
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+ 
+.status-row:last-child { border-bottom: none; }
+ 
+.status-name {
+  font-size: 13px;
+  color: rgba(245,243,238,0.6);
+}
+ 
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+ 
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.dot-active { background: #7AB8A0; animation: pulse 2s infinite; }
+.dot-building { background: var(--gold); animation: pulse 2.5s infinite; }
+.dot-paused { background: var(--ash); }
+ 
+.text-active { color: #7AB8A0; }
+.text-building { color: var(--gold); }
+.text-paused { color: var(--ash); }
+ 
+/* ── FOOTER MARK ── */
+#footer-mark {
+  padding: 48px 80px 48px 160px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+ 
+.footer-left {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ash);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+ 
+.footer-sig {
+  font-family: var(--serif);
+  font-size: 13px;
+  font-style: italic;
+  color: rgba(245,243,238,0.25);
+}
+ 
+/* ── VERTICAL NAV (right edge, fixed) ── */
+#vnav {
+  position: fixed;
+  left: 56px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 800;
+}
+ 
+.vnav-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ash);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+  position: relative;
+}
+ 
+.vnav-dot.active {
+  background: var(--gold);
+  transform: scale(1.5);
+}
+ 
+.vnav-dot::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+ 
+.vnav-dot:hover::after { opacity: 1; }
+.vnav-dot.active::after { color: var(--gold); opacity: 1; }
+ 
+/* ── PHILOSOPHY QUOTE ── */
+.philosophy-block {
+  margin: 48px 0;
+  padding-left: 40px;
+  border-left: 1px solid var(--gold-dim);
+}
+ 
+.philosophy-block blockquote {
+  font-family: var(--serif);
+  font-size: clamp(18px, 2.5vw, 26px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.6;
+  color: rgba(245,243,238,0.5);
+}
+ 
+.philosophy-block cite {
+  display: block;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash);
+  font-style: normal;
+}
+ 
+/* ── PROGRESSION MARK ── */
+.progression {
+  margin: 48px 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+ 
+.prog-step {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+ 
+.prog-word {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash);
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  transition: color 0.3s, border-color 0.3s;
+}
+ 
+.prog-word:hover { color: var(--gold); border-color: rgba(201,168,76,0.3); }
+ 
+.prog-arrow {
+  font-size: 10px;
+  color: var(--ash);
+  padding: 0 4px;
+}
+ 
+/* ── SCROLL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+ 
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+ 
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-delay-6 { transition-delay: 0.6s; }
+ 
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  section { padding: 72px 24px 72px 24px; }
+  .hero-inner { padding: 72px 24px; }
+  .section-label { left: 24px; }
+  .manifest-grid { grid-template-columns: 1fr; gap: 48px; }
+  .rooms-grid { grid-template-columns: 1fr; }
+  .project-item { grid-template-columns: 40px 1fr; }
+  .project-meta { display: none; }
+  .ecosystem-grid { grid-template-columns: 1fr; }
+  .entries-grid { grid-template-columns: 1fr; }
+  .transmit-layout { grid-template-columns: 1fr; gap: 48px; }
+  #vnav { display: none; }
+  #footer-mark { padding: 32px 24px; }
+  .hero-watermark { font-size: 160px; right: -20px; }
+}
+</style>
+</head>
+<body>
+ 
+<!-- CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+ 
+<!-- COORDINATES -->
+<div id="coords">00.001 / FOUNDRY·OS</div>
+ 
+<!-- VERTICAL NAV -->
+<nav id="vnav" aria-label="Section navigation">
+  <div class="vnav-dot active" data-section="hero" data-label="Entry" onclick="scrollTo('#hero')"></div>
+  <div class="vnav-dot" data-section="manifest" data-label="Manifest" onclick="scrollTo('#manifest')"></div>
+  <div class="vnav-dot" data-section="layers" data-label="Layers" onclick="scrollTo('#layers')"></div>
+  <div class="vnav-dot" data-section="buildlog" data-label="Build Log" onclick="scrollTo('#buildlog')"></div>
+  <div class="vnav-dot" data-section="adxverse" data-label="ADXverse" onclick="scrollTo('#adxverse')"></div>
+  <div class="vnav-dot" data-section="notebook" data-label="Notebook" onclick="scrollTo('#notebook')"></div>
+  <div class="vnav-dot" data-section="transmit" data-label="Transmit" onclick="scrollTo('#transmit')"></div>
+</nav>
+ 
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HERO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section id="hero">
+  <span class="section-label">ENTRY / 00.001</span>
+ 
+  <!-- Architectural grid SVG -->
+  <svg class="hero-grid" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+        <path d="M 80 0 L 0 0 0 80" fill="none" stroke="white" stroke-width="0.5"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid)"/>
+  </svg>
+ 
+  <div class="hero-watermark" aria-hidden="true">I</div>
+ 
+  <div class="hero-inner">
+    <div class="hero-eyebrow reveal">Foundry OS · Est. 2024</div>
+ 
+    <h1 class="hero-name reveal reveal-delay-1">
+      Md Altamash<br><em>Asgar</em>
+    </h1>
+    <p class="hero-os-title reveal reveal-delay-2">Where Ideas Become Infrastructure</p>
+ 
+    <p class="hero-statement reveal reveal-delay-3">
+      Computer Science engineer. Builder of systems. Explorer of design.
+      Student of entrepreneurship. Documenting the process of becoming —
+      honestly, publicly, imperfectly.
+    </p>
+ 
+    <div class="hero-cta-row reveal reveal-delay-4">
+      <a href="#manifest" class="cta-enter" onclick="document.getElementById('manifest').scrollIntoView({behavior:'smooth'}); return false;">Enter the Foundry</a>
+      <a href="#buildlog" class="cta-secondary" onclick="document.getElementById('buildlog').scrollIntoView({behavior:'smooth'}); return false;">View Build Log</a>
+    </div>
+  </div>
+</section>
+ 
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ MANIFEST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section id="manifest">
+  <span class="section-label">MANIFEST / 00.002</span>
+ 
+  <div class="manifest-grid">
+    <div class="manifest-left">
+      <div class="section-number reveal">Manifest</div>
+      <h2 class="section-title reveal reveal-delay-1">The builder<br>in <em>progress</em></h2>
+ 
+      <p class="body-text reveal reveal-delay-2">
+        I am a Computer Science student at the intersection of engineering,
+        design, and entrepreneurship. I do not have all the answers —
+        but I am asking the right questions and building toward them.
+      </p>
+ 
+      <p class="body-text reveal reveal-delay-3">
+        Foundry OS is my operating system for life. A methodology for
+        turning ideas into systems, systems into ventures, and ventures
+        into ecosystems that outlast any single project.
+      </p>
+ 
+      <div class="philosophy-block reveal reveal-delay-4">
+        <blockquote>"I am not building a brand. I am building a body of work — one system, one experiment, one lesson at a time."</blockquote>
+        <cite>— From the Foundry OS Manifesto</cite>
+      </div>
+ 
+      <div class="progression reveal reveal-delay-5">
+        <div class="prog-step">
+          <span class="prog-word">Ideas</span>
+          <span class="prog-arrow">›</span>
+        </div>
+        <div class="prog-step">
+          <span class="prog-word">Systems</span>
+          <span class="prog-arrow">›</span>
+        </div>
+        <div class="prog-step">
+          <span class="prog-word">Ventures</span>
+          <span class="prog-arrow">›</span>
+        </div>
+        <div class="prog-step">
+          <span class="prog-word">Ecosystems</span>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="manifest-right">
+      <div class="identity-row reveal">
+        <span class="identity-label">Status</span>
+        <span class="identity-value">Undergraduate CSE Student</span>
+      </div>
+      <div class="identity-row reveal reveal-delay-1">
+        <span class="identity-label">Mode</span>
+        <span class="identity-value">Builder · Learner · Explorer</span>
+      </div>
+      <div class="identity-row reveal reveal-delay-2">
+        <span class="identity-label">Domain</span>
+        <span class="identity-value">Technology × Design × Business</span>
+      </div>
+      <div class="identity-row reveal reveal-delay-3">
+        <span class="identity-label">Philosophy</span>
+        <span class="identity-value">Systems Thinking</span>
+      </div>
+      <div class="identity-row reveal reveal-delay-4">
+        <span class="identity-label">Output</span>
+        <span class="identity-value">Infrastructure, Not Content</span>
+      </div>
+      <div class="identity-row reveal reveal-delay-5">
+        <span class="identity-label">Stage</span>
+        <span class="identity-value">Early · Intentional · Honest</span>
+      </div>
+      <div class="identity-row reveal reveal-delay-6">
+        <span class="identity-label">Architecture</span>
+        <span class="identity-value">ADXverse Ecosystem</span>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ THREE LAYERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section id="layers">
+  <span class="section-label">ARCHITECTURE / 00.003</span>
+ 
+  <div class="layers-intro">
+    <div class="section-number reveal">Three Rooms</div>
+    <h2 class="section-title reveal reveal-delay-1">Three layers<br>of <em>one person</em></h2>
+    <p class="body-text reveal reveal-delay-2">
+      Every visitor who spends time here will gradually discover three
+      simultaneous dimensions — not presented at once, but revealed
+      as you move through the work.
+    </p>
+  </div>
+ 
+  <div class="rooms-grid">
+    <div class="room reveal">
+      <div class="room-number">I</div>
+      <div class="room-name">The Surface</div>
+      <h3 class="room-title">The Builder</h3>
+      <p class="room-body">
+        The visible architect. The engineer executing. The entrepreneur
+        shipping, iterating, failing, and shipping again. This is the
+        layer the world sees first — the products, the projects,
+        the systems in production.
+      </p>
+    </div>
+    <div class="room reveal reveal-delay-2">
+      <div class="room-number">II</div>
+      <div class="room-name">The Method</div>
+      <h3 class="room-title">Foundry OS</h3>
+      <p class="room-body">
+        The operating system beneath the work. The methodology, the
+        frameworks, the experiments — the learning engine that converts
+        raw experience into replicable systems. A philosophy of building
+        that scales beyond any single project.
+      </p>
+    </div>
+    <div class="room reveal reveal-delay-4">
+      <div class="room-number">III</div>
+      <div class="room-name">The Foundation</div>
+      <h3 class="room-title">The Secluded Soul</h3>
+      <p class="room-body">
+        The observer. The thinker. The one asking why any of it matters.
+        The reflective layer beneath all building — faith, character,
+        meaning. The philosophical bedrock that gives direction to
+        everything built above it.
+      </p>
+    </div>
+  </div>
+</section>
+ 
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BUILD LOG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section id="buildlog">
+  <span class="section-label">BUILD LOG / 00.004</span>
+ 
+  <div class="log-header">
+    <div>
+      <div class="section-number reveal">Build Log</div>
+      <h2 class="section-title reveal reveal-delay-1">What's being<br><em>forged</em></h2>
+    </div>
+    <div class="log-status reveal reveal-delay-2">
+      <span></span>Live Build · Updated 2025
+    </div>
+  </div>
+ 
+  <div class="projects-list">
+    <div class="project-item reveal">
+      <div class="project-index">001</div>
+      <div class="project-main">
+        <div class="project-name">ADXverse Ecosystem</div>
+        <p class="project-desc">
+          The overarching infrastructure — a network of ventures, studios,
+          and digital entities operating as one coherent ecosystem rather
+          than isolated products. ADX Nexus, ADX Studios, ADX Space, and
+          beyond — each a node in a larger vision.
+        </p>
+      </div>
+      <div class="project-meta">
+        <div class="project-status status-active">Active</div>
+        <div class="project-year">2024 — Ongoing</div>
+      </div>
+    </div>
+ 
+    <div class="project-item reveal reveal-delay-1">
+      <div class="project-index">002</div>
+      <div class="project-main">
+        <div class="project-name">Foundry OS</div>
+        <p class="project-desc">
+          A personal operating system for building — a methodology for
+          converting ideas into infrastructure. Documented publicly as
+          both a learning archive and a replicable framework for
+          systematic creation.
+        </p>
+      </div>
+      <div class="project-meta">
+        <div class="project-status status-building">Building</div>
+        <div class="project-year">2024 — Present</div>
+      </div>
+    </div>
+ 
+    <div class="project-item reveal reveal-delay-2">
+      <div class="project-index">003</div>
+      <div class="project-main">
+        <div class="project-name">ADX Nexus</div>
+        <p class="project-desc">
+          Core technology and software arm of ADXverse. Engineering
+          production-grade digital systems, tools, and infrastructure
+          for businesses and creators — built on scalable architecture
+          with revenue-first design.
+        </p>
+      </div>
+      <div class="project-meta">
+        <div class="project-status status-building">Building</div>
+        <div class="project-year">2025</div>
+      </div>
+    </div>
+ 
+    <div class="project-item reveal reveal-delay-3">
+      <div class="project-index">004</div>
+      <div class="project-main">
+        <div class="project-name">ADX Studios</div>
+        <p class="project-desc">
+          Design and brand environments studio. Where technology meets
+          spatial intelligence — digital identities, brand ecosystems,
+          and immersive environments for ventures that demand more than
+          a logo and a website.
+        </p>
+      </div>
+      <div class="project-meta">
+        <div class="project-status status-research">Research</div>
+        <div class="project-year">2025</div>
+      </div>
+    </div>
+ 
+    <div class="project-item reveal reveal-delay-4">
+      <div class="project-index">005</div>
+      <div class="project-main">
+        <div class="project-name">ADX Space</div>
+        <p class="project-desc">
+          A knowledge architecture project — a curated space for
+          research, documentation, and intellectual exploration. Interior
+          design principles applied to the architecture of information.
+        </p>
+      </div>
+      <div class="project-meta">
+        <div class="project-status status-concept">Concept</div>
+        <div class="project-year">2025</div>
+      </div>
+    </div>
+ 
+    <div class="project-item reveal reveal-delay-5">
+      <div class="project-index">006</div>
+      <div class="project-main">
+        <div class="project-name">ADX Tapestry</div>
+        <p class="project-desc">
+          The thread connecting all ADXverse ventures — a unified brand
+          narrative, cultural identity, and design philosophy that makes
+          every node feel like part of one coherent institution rather
+          than a collection of startups.
+        </p>
+      </div>
+      <div class="project-meta">
+        <div class="project-status status-concept">Concept</div>
+        <div class="project-year">2025</div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ADXVERSE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section id="adxverse">
+  <span class="section-label">ECOSYSTEM / 00.005</span>
+ 
+  <div class="ecosystem-title-block">
+    <div class="section-number reveal">ADXverse</div>
+    <h2 class="section-title reveal reveal-delay-1">An ecosystem,<br>not a <em>company</em></h2>
+    <p class="body-text reveal reveal-delay-2">
+      ADXverse is the umbrella architecture — not a brand, not a business,
+      but an evolving collection of ventures operating as a single coherent
+      universe. Each node serves a distinct purpose; together they form
+      something larger.
+    </p>
+  </div>
+ 
+  <div class="ecosystem-grid">
+    <div class="eco-node reveal">
+      <div class="eco-node-tag">Core</div>
+      <div class="eco-node-name">ADX Nexus</div>
+      <p class="eco-node-desc">Technology and engineering core. Building digital infrastructure, software systems, and production-grade tools for businesses that need more than off-the-shelf solutions.</p>
+      <div class="eco-node-domains">
+        <span class="domain-tag">Software</span>
+        <span class="domain-tag">Engineering</span>
+        <span class="domain-tag">Systems</span>
+        <span class="domain-tag">AI</span>
+      </div>
+    </div>
+ 
+    <div class="eco-node reveal reveal-delay-1">
+      <div class="eco-node-tag">Creative</div>
+      <div class="eco-node-name">ADX Studios</div>
+      <p class="eco-node-desc">Design and brand environments. Where digital intelligence meets spatial thinking — crafting environments, identities, and experiences that carry meaning beyond aesthetics.</p>
+      <div class="eco-node-domains">
+        <span class="domain-tag">Design</span>
+        <span class="domain-tag">Brand</span>
+        <span class="domain-tag">Environments</span>
+        <span class="domain-tag">Identity</span>
+      </div>
+    </div>
+ 
+    <div class="eco-node reveal reveal-delay-2">
+      <div class="eco-node-tag">Knowledge</div>
+      <div class="eco-node-name">ADX Space</div>
+      <p class="eco-node-desc">Research and knowledge architecture. A curated laboratory where ideas are documented, systems are stress-tested, and accumulated intelligence becomes retrievable infrastructure.</p>
+      <div class="eco-node-domains">
+        <span class="domain-tag">Research</span>
+        <span class="domain-tag">Documentation</span>
+        <span class="domain-tag">Learning</span>
+      </div>
+    </div>
+ 
+    <div class="eco-node reveal reveal-delay-3">
+      <div class="eco-node-tag">Narrative</div>
+      <div class="eco-node-name">ADX Tapestry</div>
+      <p class="eco-node-desc">The connective tissue. Cultural identity, unified narrative, and the design philosophy that weaves every ADXverse venture into one recognizable institutional voice.</p>
+      <div class="eco-node-domains">
+        <span class="domain-tag">Culture</span>
+        <span class="domain-tag">Philosophy</span>
+        <span class="domain-tag">Narrative</span>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ NOTEBOOK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section id="notebook">
+  <span class="section-label">NOTEBOOK / 00.006</span>
+ 
+  <div class="notebook-header">
+    <div class="section-number reveal">Notebook</div>
+    <h2 class="section-title reveal reveal-delay-1">The unfinished<br><em>archive</em></h2>
+    <p class="body-text reveal reveal-delay-2">
+      Learning in public. Notes from the workshop — observations,
+      experiments, questions without answers, and lessons from building
+      things that did not work. The archive is intentionally unfinished.
+    </p>
+  </div>
+ 
+  <div class="entries-grid">
+    <div class="entry-card reveal">
+      <div class="entry-date">2025 · Systems Thinking</div>
+      <h3 class="entry-title">Why most startups solve the wrong problem first</h3>
+      <p class="entry-excerpt">The seduction of building before defining. On the discipline of problem architecture before solution architecture — and why the best founders spend 80% of time understanding what they are actually building.</p>
+      <span class="entry-domain">Entrepreneurship</span>
+    </div>
+ 
+    <div class="entry-card reveal reveal-delay-1">
+      <div class="entry-date">2025 · Design Research</div>
+      <h3 class="entry-title">Interior design and information architecture are the same discipline</h3>
+      <p class="entry-excerpt">Spatial design and digital information design solve the same core problem: how to move a person through an environment and make them feel something intentional. Notes from studying both simultaneously.</p>
+      <span class="entry-domain">Design</span>
+    </div>
+ 
+    <div class="entry-card reveal reveal-delay-2">
+      <div class="entry-date">2025 · Engineering</div>
+      <h3 class="entry-title">The compound return of building systems instead of features</h3>
+      <p class="entry-excerpt">Features solve one problem once. Systems solve entire classes of problems indefinitely. On the discipline of building at the right level of abstraction — and the patience it requires.</p>
+      <span class="entry-domain">Engineering</span>
+    </div>
+ 
+    <div class="entry-card reveal reveal-delay-3">
+      <div class="entry-date">2024 · Reflection</div>
+      <h3 class="entry-title">On building without an audience — and why that is the correct order</h3>
+      <p class="entry-excerpt">The instinct to document first, build second, is backwards. Building without performance pressure produces more honest work. The audience finds work that matters; work made for audiences rarely does.</p>
+      <span class="entry-domain">Philosophy</span>
+    </div>
+ 
+    <div class="entry-card reveal reveal-delay-4">
+      <div class="entry-date">2024 · AI + Systems</div>
+      <h3 class="entry-title">AI as infrastructure, not intelligence</h3>
+      <p class="entry-excerpt">The most powerful use of AI is not replacing human judgment — it is removing the friction between intention and execution. On building AI into the pipes of a system, not the surface of a product.</p>
+      <span class="entry-domain">Technology</span>
+    </div>
+ 
+    <div class="entry-card reveal reveal-delay-5">
+      <div class="entry-date">2024 · Character</div>
+      <h3 class="entry-title">The character of the builder shapes the character of what is built</h3>
+      <p class="entry-excerpt">On the relationship between personal integrity and the quality of systems produced. The shortcuts taken in character formation appear without warning in the products we create. A working theory.</p>
+      <span class="entry-domain">Character</span>
+    </div>
+  </div>
+</section>
+ 
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ TRANSMIT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section id="transmit">
+  <span class="section-label">TRANSMIT / 00.007</span>
+ 
+  <div class="transmit-layout">
+    <div class="transmit-left">
+      <div class="section-number reveal">Transmit</div>
+      <h2 class="section-title reveal reveal-delay-1">Open to<br><em>the right</em><br>conversations</h2>
+      <p class="body-text reveal reveal-delay-2">
+        If you are building something serious — or researching, exploring,
+        or thinking about systems at the intersection of technology, design,
+        and enterprise — this is where to start the conversation.
+      </p>
+      <p class="body-text reveal reveal-delay-3">
+        Not open to: generic networking, influencer arrangements, or
+        requests for free work dressed as "collaboration."
+      </p>
+ 
+      <div class="contact-links">
+        <a href="mailto:altamash@adxverse.com" class="contact-link reveal reveal-delay-4">
+          <span class="contact-link-label">Email</span>
+          <span class="contact-link-value">
+            altamash@adxverse.com
+            <span class="contact-link-arrow">↗</span>
+          </span>
+        </a>
+        <a href="https://linkedin.com/in/altamash-asgar" target="_blank" rel="noopener" class="contact-link reveal reveal-delay-5">
+          <span class="contact-link-label">LinkedIn</span>
+          <span class="contact-link-value">
+            Altamash Asgar
+            <span class="contact-link-arrow">↗</span>
+          </span>
+        </a>
+        <a href="https://twitter.com/altamashasgar" target="_blank" rel="noopener" class="contact-link reveal reveal-delay-6">
+          <span class="contact-link-label">X / Twitter</span>
+          <span class="contact-link-value">
+            @altamashasgar
+            <span class="contact-link-arrow">↗</span>
+          </span>
+        </a>
+        <a href="https://github.com/altamashasgar" target="_blank" rel="noopener" class="contact-link reveal">
+          <span class="contact-link-label">GitHub</span>
+          <span class="contact-link-value">
+            altamashasgar
+            <span class="contact-link-arrow">↗</span>
+          </span>
+        </a>
+      </div>
+    </div>
+ 
+    <div class="transmit-right reveal reveal-delay-2">
+      <div class="system-status">
+        <div class="system-status-title">System Status · Foundry OS</div>
+ 
+        <div class="status-row">
+          <span class="status-name">ADXverse Ecosystem</span>
+          <div class="status-indicator">
+            <div class="dot dot-active"></div>
+            <span class="text-active">Active</span>
+          </div>
+        </div>
+        <div class="status-row">
+          <span class="status-name">ADX Nexus</span>
+          <div class="status-indicator">
+            <div class="dot dot-building"></div>
+            <span class="text-building">Building</span>
+          </div>
+        </div>
+        <div class="status-row">
+          <span class="status-name">ADX Studios</span>
+          <div class="status-indicator">
+            <div class="dot dot-building"></div>
+            <span class="text-building">Designing</span>
+          </div>
+        </div>
+        <div class="status-row">
+          <span class="status-name">ADX Space</span>
+          <div class="status-indicator">
+            <div class="dot dot-paused"></div>
+            <span class="text-paused">Research Phase</span>
+          </div>
+        </div>
+        <div class="status-row">
+          <span class="status-name">ADX Tapestry</span>
+          <div class="status-indicator">
+            <div class="dot dot-paused"></div>
+            <span class="text-paused">Concept</span>
+          </div>
+        </div>
+        <div class="status-row">
+          <span class="status-name">Foundry OS Notebook</span>
+          <div class="status-indicator">
+            <div class="dot dot-active"></div>
+            <span class="text-active">Live</span>
+          </div>
+        </div>
+        <div class="status-row">
+          <span class="status-name">Available for Collaboration</span>
+          <div class="status-indicator">
+            <div class="dot dot-active"></div>
+            <span class="text-active">Selective</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FOOTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<footer id="footer-mark">
+  <div class="footer-left">
+    Foundry OS · MD Altamash Asgar · ADXverse<br>
+    <span style="opacity:0.5">Ideas become infrastructure</span>
+  </div>
+  <div class="footer-sig">
+    "I am becoming." — 2024 →
+  </div>
+</footer>
+ 
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ JS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<script>
+/* CURSOR */
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mouseX = 0, mouseY = 0;
+let ringX = 0, ringY = 0;
+ 
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  cursor.style.left = mouseX + 'px';
+  cursor.style.top = mouseY + 'px';
+});
+ 
+function animateRing() {
+  ringX += (mouseX - ringX) * 0.12;
+  ringY += (mouseY - ringY) * 0.12;
+  ring.style.left = ringX + 'px';
+  ring.style.top = ringY + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+ 
+/* SCROLL-TO helper */
+function scrollTo(selector) {
+  const el = document.querySelector(selector);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+ 
+/* COORDINATES update */
+const coords = document.getElementById('coords');
+const sections = ['hero','manifest','layers','buildlog','adxverse','notebook','transmit'];
+ 
+window.addEventListener('scroll', () => {
+  const total = document.body.scrollHeight - window.innerHeight;
+  const progress = (window.scrollY / total);
+  const sectionNum = String(Math.floor(progress * 7 + 1)).padStart(2, '0');
+  coords.textContent = `00.00${sectionNum} / FOUNDRY·OS`;
+}, { passive: true });
+ 
+/* INTERSECTION OBSERVER — reveal + vnav */
+const reveals = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+ 
+reveals.forEach(el => revealObserver.observe(el));
+ 
+/* VNAV active state */
+const navDots = document.querySelectorAll('.vnav-dot');
+const sectionEls = sections.map(id => document.getElementById(id));
+ 
+const sectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navDots.forEach(d => d.classList.remove('active'));
+      const activeDot = document.querySelector(`.vnav-dot[data-section="${id}"]`);
+      if (activeDot) activeDot.classList.add('active');
+    }
+  });
+}, { threshold: 0.4 });
+ 
+sectionEls.forEach(el => { if (el) sectionObserver.observe(el); });
+ 
+/* INITIAL REVEAL for hero */
+window.addEventListener('load', () => {
+  const heroReveals = document.querySelectorAll('#hero .reveal');
+  heroReveals.forEach((el, i) => {
+    setTimeout(() => el.classList.add('visible'), 200 + i * 120);
+  });
+});
+ 
+/* EMBER TRAIL */
+const canvas = document.createElement('canvas');
+canvas.style.cssText = 'position:fixed;top:0;left:0;pointer-events:none;z-index:998;width:100%;height:100%;';
+document.body.appendChild(canvas);
+const ctx = canvas.getContext('2d');
+ 
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+ 
+const embers = [];
+let lastMX = 0, lastMY = 0;
+ 
+document.addEventListener('mousemove', e => {
+  const dx = e.clientX - lastMX;
+  const dy = e.clientY - lastMY;
+  const speed = Math.sqrt(dx * dx + dy * dy);
+ 
+  if (speed > 3 && Math.random() > 0.4) {
+    embers.push({
+      x: e.clientX + (Math.random() - 0.5) * 4,
+      y: e.clientY + (Math.random() - 0.5) * 4,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: -Math.random() * 1.2 - 0.3,
+      life: 1.0,
+      size: Math.random() * 1.5 + 0.5
+    });
+  }
+ 
+  lastMX = e.clientX;
+  lastMY = e.clientY;
+});
+ 
+function animateEmbers() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+ 
+  for (let i = embers.length - 1; i >= 0; i--) {
+    const em = embers[i];
+    em.x += em.vx;
+    em.y += em.vy;
+    em.vy += 0.02;
+    em.life -= 0.03;
+ 
+    if (em.life <= 0) {
+      embers.splice(i, 1);
+      continue;
+    }
+ 
+    const alpha = em.life * 0.7;
+    ctx.beginPath();
+    ctx.arc(em.x, em.y, em.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(201,168,76,${alpha})`;
+    ctx.fill();
+  }
+ 
+  requestAnimationFrame(animateEmbers);
+}
+animateEmbers();
+</script>
+ 
+</body>
+</html>
+ 
